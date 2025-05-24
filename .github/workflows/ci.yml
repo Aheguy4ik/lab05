@@ -2,36 +2,48 @@ name: CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
-  build:
+  build_Linux:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-      with:
-        submodules: true
+      - uses: actions/checkout@v4
 
-    - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y cmake build-essential lcov
+      # Клонируем googletest в правильную папку
+      - name: Setup googletest submodule
+        run: |
+          git submodule update --init --recursive
+          # Если submodule нет — можно заменить на git clone, но лучше submodule
 
-    - name: Configure CMake
-      run: cmake -S . -B _build -DBUILD_TESTS=ON
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y lcov cmake g++ 
 
-    - name: Build project
-      run: cmake --build _build
+      - name: Configure build with coverage flags
+        run: |
+          rm -rf _build
+          mkdir _build
+          cd _build
+          cmake .. -DBUILD_TESTS=ON -DCOVERAGE=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+          # Убедись, что CMakeLists.txt правильно включает --coverage при COVERAGE=ON
 
-    - name: Run tests
-      run: ctest --test-dir _build --output-on-failure
+      - name: Build
+        run: cmake --build _build
 
-    - name: Capture coverage
-      run: lcov --capture --directory _build --output-file coverage.info --rc geninfo_ignore_errors=mismatch,gcov,empty,source --rc geninfo_unexecuted_blocks=1
+      - name: Run tests
+        run: ctest --test-dir _build --output-on-failure
 
-    - name: Upload coverage report
-      uses: actions/upload-artifact@v4
-      with:
-        name: coverage-report
-        path: coverage.info
+      - name: Capture coverage info with lcov
+        run: |
+          mkdir -p coverage
+          lcov --capture --directory _build --output-file coverage/lcov.info --rc geninfo_ignore_errors=mismatch,gcov,empty,source --rc geninfo_unexecuted_blocks=1
+          lcov --remove coverage/lcov.info '/usr/*' 'third-party/*' --output-file coverage/lcov.info  # убираем системные и внешние файлы
+
+      - name: Upload coverage to Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: coverage/lcov.info
