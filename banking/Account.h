@@ -5,10 +5,10 @@ public:
     Account(int id, int balance);
     virtual ~Account() = default;
 
-    int GetBalance() const;
+    virtual int GetBalance() const;
     void SetBalance(int balance);
 
-    int GetId() const;
+    virtual int GetId() const;
     void SetId(int id);
 
     virtual void Lock();

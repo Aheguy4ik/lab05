@@ -26,9 +26,15 @@ void Account::Lock() {
 }
 
 void Account::Unlock() {
+    if (!is_locked_) {
+        throw std::runtime_error("Account is not locked");
+    }
     is_locked_ = false;
 }
 
 void Account::ChangeBalance(int diff) {
+    if (!is_locked_) {
+        throw std::runtime_error("Account must be locked before changing balance");
+    }
     balance_ += diff;
 }

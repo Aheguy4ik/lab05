@@ -14,12 +14,13 @@ public:
     MOCK_METHOD0(Unlock, void());
     MOCK_METHOD1(ChangeBalance, void(int));
     MOCK_CONST_METHOD0(GetBalance, int());
+    MOCK_CONST_METHOD0(GetId, int());
 };
 
 class TestTransaction : public Transaction {
 protected:
-    void SaveToDataBase(Account& from, Account& to, int sum) override {
-        // мокать не будем, просто заглушка
+    void SaveToDataBase([[maybe_unused]] Account& from, [[maybe_unused]] Account& to, [[maybe_unused]] int sum) override {
+    // пусто — заглушка
     }
 };
 
@@ -27,6 +28,9 @@ TEST(TransactionTest, TransfersMoneyCorrectly) {
     MockAccount from(1, 500);
     MockAccount to(2, 100);
     TestTransaction tx;
+
+    EXPECT_CALL(from, GetId()).WillRepeatedly(Return(1));
+    EXPECT_CALL(to, GetId()).WillRepeatedly(Return(2));
 
     EXPECT_CALL(from, Lock()).Times(1);
     EXPECT_CALL(to, Lock()).Times(1);
