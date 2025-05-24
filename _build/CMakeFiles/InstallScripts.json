@@ -1,0 +1,10 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/aheguy/lab05/_build/cmake_install.cmake",
+		"/home/aheguy/lab05/_build/third-party/gtest/cmake_install.cmake",
+		"/home/aheguy/lab05/_build/third-party/gtest/googlemock/cmake_install.cmake",
+		"/home/aheguy/lab05/_build/third-party/gtest/googlemock/gtest/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
