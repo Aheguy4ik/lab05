@@ -11,16 +11,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
+    - name: Checkout code with submodules
       uses: actions/checkout@v4
       with:
-        submodules: true
+        submodules: recursive
 
     - name: Install dependencies
       run: sudo apt-get update && sudo apt-get install -y lcov
 
     - name: Clean CMake cache
       run: rm -rf _build
+
+    # Если нет субмодулей с googletest, раскомментируй эту часть
+    #- name: Download googletest
+    #  run: git clone --depth=1 https://github.com/google/googletest.git third-party/googletest
 
     - name: Configure CMake
       run: cmake -H. -B_build -DBUILD_TESTS=ON -DCOVERAGE=ON
@@ -30,9 +34,6 @@ jobs:
 
     - name: Run tests
       run: ctest --output-on-failure --test-dir _build
-
-    - name: Check for coverage files
-      run: find _build -name '*.gcda'
 
     - name: Capture coverage info
       run: lcov --capture --directory _build --output-file coverage.info
