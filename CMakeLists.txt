@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.10)
 project(banking)
 
 set(CMAKE_CXX_STANDARD 11)
@@ -19,16 +19,17 @@ set(Headers
 )
 
 add_library(banking STATIC ${Sources} ${Headers})
-target_include_directories(banking PUBLIC banking)
+
+target_include_directories(banking PUBLIC ${CMAKE_SOURCE_DIR}/banking)
 
 if(BUILD_TESTS)
-    enable_testing()
     add_subdirectory(third-party/gtest)
-    add_executable(my_test tests/tests.cpp)
-    target_link_libraries(my_test
-        gtest_main
-        gmock_main
-        banking
-    )
-    add_test(NAME my_test COMMAND my_test)
+
+    # Глушим предупреждения maybe-uninitialized для googletest
+    target_compile_options(gtest PRIVATE -Wno-maybe-uninitialized)
+    target_compile_options(gmock PRIVATE -Wno-maybe-uninitialized)
+    target_compile_options(gtest_main PRIVATE -Wno-maybe-uninitialized)
+    target_compile_options(gmock_main PRIVATE -Wno-maybe-uninitialized)
+
+    add_subdirectory(tests)
 endif()

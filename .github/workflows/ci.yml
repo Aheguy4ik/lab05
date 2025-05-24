@@ -12,30 +12,28 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-      with:
-        submodules: recursive   # вот тут подтянем gtest правильно
 
-    - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y lcov
+    - name: putting gtest
+      run: git clone https://github.com/google/googletest.git third-party/gtest
 
-    - name: Configure and build
+    - name: Install lcov
+      run: sudo apt-get install -y lcov
+
+    - name: Configurate
       run: |
-        rm -rf _build
-        mkdir _build
-        cd _build
-        cmake .. -DBUILD_TESTS=ON -DCMAKE_CXX_FLAGS="--coverage"
+        rm -rf ${{github.workspace}}/_build
+        mkdir _build && cd _build
+        cmake .. -DBUILD_TESTS=ON -DCMAKE_CXX_FLAGS='--coverage'
         cmake --build .
 
     - name: Run tests
-      run: ./_build/my_test
+      run: _build/my_test
 
-    - name: Capture coverage info
-      run: |
-        mkdir -p coverage
-        lcov --capture --directory _build --output-file coverage/lcov.info --rc lcov_branch_coverage=1
+    - name: lcov
+      run: lcov -c -d _build/ --include '*.cpp' --output-file ./coverage/lcov.info
 
-    - name: Upload coverage to Coveralls
+    - name: Coveralls
       uses: coverallsapp/github-action@v2
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        path-to-lcov: coverage/lcov.info
+        path-to-lcov: ${{ github.workspace }}/coverage/lcov.info

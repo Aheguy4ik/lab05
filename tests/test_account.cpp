@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "banking/Account.h"
+#include "Account.h"
 
 TEST(AccountTest, InitialBalanceCorrect) {
     Account acc(1, 100);

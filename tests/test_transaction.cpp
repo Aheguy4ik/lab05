@@ -1,8 +1,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "banking/Account.h"
-#include "banking/Transaction.h"
+#include "Account.h"
+#include "Transaction.h"
 
 using namespace testing;
 
