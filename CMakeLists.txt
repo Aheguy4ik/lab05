@@ -1,52 +1,33 @@
 cmake_minimum_required(VERSION 3.10)
-
 project(lab05)
+
+option(BUILD_TESTS "Build tests" ON)
+option(COVERAGE "Enable coverage" OFF)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Отключаем превращение warning в error (иначе gtest не соберётся)
-add_compile_options(-Wall -Wextra -Wno-error)
+# Флаги покрытия
+if(COVERAGE)
+  message(STATUS "Building with coverage flags")
+  add_compile_options(-fprofile-arcs -ftest-coverage -O0)
+  link_libraries(gcov)
+endif()
 
-# Либа banking
+# Твои исходники, например:
 add_library(banking
-    banking/Account.cpp
-    banking/Transaction.cpp
+  banking/Account.cpp
+  banking/Transaction.cpp
 )
 
-# Указываем пути для инклюдов библиотеки banking
-target_include_directories(banking PUBLIC
-    ${CMAKE_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/banking
-)
+if(BUILD_TESTS)
+  enable_testing()
 
-# Настройки для GTest
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-set(BUILD_GMOCK ON)
-set(BUILD_GTEST ON)
-set(INSTALL_GTEST OFF)
-
-# Подключаем gtest как сабдиректорию
-add_subdirectory(third-party/gtest)
-
-# Исполняемый файл для юнит-тестов
-add_executable(unit_tests
+  add_executable(unit_tests
     tests/test_account.cpp
     tests/test_transaction.cpp
-)
+  )
+  target_link_libraries(unit_tests banking gtest gmock pthread)
 
-# Включаем пути для тестов (чтобы находились хедеры banking и корень)
-target_include_directories(unit_tests PRIVATE
-    ${CMAKE_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/banking
-)
-
-# Линкуем тесты с нужными библиотеками
-target_link_libraries(unit_tests
-    banking
-    gtest
-    gtest_main
-    gmock
-    gmock_main
-    pthread
-)
+  add_test(NAME unit_tests COMMAND unit_tests)
+endif()
