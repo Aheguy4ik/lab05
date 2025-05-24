@@ -1,22 +1,34 @@
 #include "Account.h"
-
 #include <stdexcept>
 
 Account::Account(int id, int balance)
     : id_(id), balance_(balance), is_locked_(false) {}
 
-Account::~Account() {}
+int Account::GetBalance() const {
+    return balance_;
+}
 
-int Account::GetBalance() const { return balance_; }
+void Account::SetBalance(int balance) {
+    balance_ = balance;
+}
 
-void Account::ChangeBalance(int diff) {
-  if (!is_locked_) throw std::runtime_error("at first lock the account");
-  balance_ += diff;
+int Account::GetId() const {
+    return id_;
+}
+
+void Account::SetId(int id) {
+    id_ = id;
 }
 
 void Account::Lock() {
-  if (is_locked_) throw std::runtime_error("already locked");
-  is_locked_ = true;
+    if (is_locked_) throw std::runtime_error("Account already locked");
+    is_locked_ = true;
 }
 
-void Account::Unlock() { is_locked_ = false; }
+void Account::Unlock() {
+    is_locked_ = false;
+}
+
+void Account::ChangeBalance(int diff) {
+    balance_ += diff;
+}

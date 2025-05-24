@@ -1,24 +1,22 @@
 #pragma once
+
 class Account {
- public:
-  Account(int id, int balance);
-  virtual ~Account();
+public:
+    Account(int id, int balance);
+    virtual ~Account() = default;
 
-  // Virtual to test.
-  virtual int GetBalance() const;
+    int GetBalance() const;
+    void SetBalance(int balance);
 
-  // Virtual to test.
-  virtual void ChangeBalance(int diff);
+    int GetId() const;
+    void SetId(int id);
 
-  // Virtual to test.
-  virtual void Lock();
+    virtual void Lock();
+    virtual void Unlock();
+    virtual void ChangeBalance(int diff);
 
-  // Virtual to test.
-  virtual void Unlock();
-  int id() const { return id_; }
-
- private:
-  int id_;
-  int balance_;
-  bool is_locked_;
+private:
+    int id_;
+    int balance_;
+    bool is_locked_;
 };
