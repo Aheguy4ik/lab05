@@ -19,6 +19,9 @@ jobs:
     - name: Install dependencies
       run: sudo apt-get update && sudo apt-get install -y lcov
 
+    - name: Clean CMake cache
+      run: rm -rf _build
+
     - name: Configure CMake
       run: cmake -H. -B_build -DBUILD_TESTS=ON -DCOVERAGE=ON
 
