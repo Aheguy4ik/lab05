@@ -30,7 +30,9 @@ jobs:
       run: _build/tests/my_test
 
     - name: lcov
-      run: lcov -c -d _build/ --include '*.cpp' --output-file ./coverage/lcov.info
+      run: |
+        mkdir -p coverage
+        lcov -c -d _build/ --include '*.cpp' --output-file ./coverage/lcov.info
 
     - name: Coveralls
       uses: coverallsapp/github-action@v2
