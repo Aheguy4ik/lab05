@@ -27,7 +27,7 @@ jobs:
         cmake --build .
 
     - name: Run tests
-      run: _build/my_test
+      run: _build/tests/my_test
 
     - name: lcov
       run: lcov -c -d _build/ --include '*.cpp' --output-file ./coverage/lcov.info
