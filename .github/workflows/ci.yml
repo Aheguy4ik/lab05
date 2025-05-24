@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -17,17 +17,7 @@ jobs:
         submodules: true
 
     - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y lcov cmake g++ gcc
-
-    - name: Set up googletest
-      run: |
-        git clone https://github.com/google/googletest.git third-party/googletest
-        mkdir -p third-party/googletest/build
-        cd third-party/googletest/build
-        cmake ..
-        make
+      run: sudo apt-get update && sudo apt-get install -y lcov
 
     - name: Configure CMake
       run: cmake -S . -B _build -DBUILD_TESTS=ON -DCOVERAGE=ON
@@ -36,10 +26,10 @@ jobs:
       run: cmake --build _build
 
     - name: Run tests
-      run: cd _build && ctest
+      run: ctest --test-dir _build --output-on-failure
 
     - name: Collect coverage
       run: |
-        lcov --directory _build --capture --output-file coverage.info
-        lcov --remove coverage.info '/usr/*' '*/googletest/*' --output-file coverage.info
+        lcov --capture --directory _build --output-file coverage.info
+        lcov --remove coverage.info '/usr/*' '*/third-party/*' --output-file coverage.info
         lcov --list coverage.info
