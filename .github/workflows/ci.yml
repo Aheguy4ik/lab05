@@ -1,30 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: true
 
-      - name: Clone googletest
-        run: git clone --depth=1 https://github.com/google/googletest.git third-party/googletest
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y lcov cmake g++ gcc
 
-      - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y lcov
+    - name: Set up googletest
+      run: |
+        git clone https://github.com/google/googletest.git third-party/googletest
+        mkdir -p third-party/googletest/build
+        cd third-party/googletest/build
+        cmake ..
+        make
 
-      - name: Clean build directory
-        run: rm -rf _build
+    - name: Configure CMake
+      run: cmake -S . -B _build -DBUILD_TESTS=ON -DCOVERAGE=ON
 
-      - name: Configure CMake
-        run: cmake -S . -B _build -DBUILD_TESTS=ON -DCOVERAGE=ON
+    - name: Build
+      run: cmake --build _build
 
-      - name: Build project
-        run: cmake --build _build -- -j$(nproc)
+    - name: Run tests
+      run: cd _build && ctest
 
-      - name: Run tests
-        run: ctest --output-on-failure --test-dir _build
-
-      - name: Capture coverage info
-        run: lcov --capture --directory _build --output-file coverage.info
-
-      - name: Show coverage summary
-        run: lcov --list coverage.info
+    - name: Collect coverage
+      run: |
+        lcov --directory _build --capture --output-file coverage.info
+        lcov --remove coverage.info '/usr/*' '*/googletest/*' --output-file coverage.info
+        lcov --list coverage.info
