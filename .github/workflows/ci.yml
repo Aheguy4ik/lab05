@@ -32,4 +32,5 @@ jobs:
       run: cmake --build _build --target test
 
     - name: Collect coverage
-      run: lcov --capture --directory _build --output-file coverage.info --rc geninfo_ignore_errors=mismatch
+      run: lcov --capture --directory _build --output-file coverage.info --rc geninfo_ignore_errors=mismatch,gcov,empty,source --rc geninfo_unexecuted_blocks=1
+
