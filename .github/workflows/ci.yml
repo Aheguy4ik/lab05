@@ -1,36 +1,40 @@
-name: CI
+name: CI Pipeline
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
   pull_request:
-    branches: [ master ]
+    branches:
+      - master
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        submodules: true
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-    - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y lcov
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y cmake lcov g++ make
 
-    - name: Clean build directory
-      run: rm -rf _build
+      - name: Configure CMake
+        run: cmake -S . -B _build -DBUILD_TESTS=ON -DCOVERAGE=ON
 
-    - name: Configure CMake
-      run: cmake -S . -B _build -DBUILD_TESTS=ON -DCOVERAGE=ON
+      - name: Build project
+        run: cmake --build _build
 
-    - name: Build
-      run: cmake --build _build
+      - name: Run tests
+        run: ctest --output-on-failure --test-dir _build
 
-    - name: Run tests
-      run: cmake --build _build --target test
+      - name: Capture coverage
+        run: |
+          lcov --capture --directory _build --output-file coverage.info \
+          --rc geninfo_unexecuted_blocks=1 --ignore-errors=all
 
-    - name: Collect coverage
-      run: lcov --capture --directory _build --output-file coverage.info --rc geninfo_ignore_errors=mismatch,gcov,empty,source --rc geninfo_unexecuted_blocks=1
-
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: coverage.info
